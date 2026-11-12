@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/robinvdvleuten/tzatziki/compare/v0.1.0...v0.1.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* catch rrule-go panics when it starts a rule ([#7](https://github.com/robinvdvleuten/tzatziki/issues/7)) ([3627041](https://github.com/robinvdvleuten/tzatziki/commit/36270412e010f81667be2e49739000cb0be2c717))
+
 ## 0.1.0 (2026-11-12)
 
 
