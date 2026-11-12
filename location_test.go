@@ -134,6 +134,8 @@ func TestToLocationRefusesBadDefinitions(t *testing.T) {
 		{"bad start", standard("DTSTART:yesterday", "TZOFFSETFROM:+0100", "TZOFFSETTO:+0100"), "DTSTART"},
 		{"bad RDATE", standard("DTSTART:19700101T000000", "TZOFFSETFROM:+0100", "TZOFFSETTO:+0100", "RDATE:soon"), "RDATE"},
 		{"bad RRULE", standard("DTSTART:19700101T000000", "TZOFFSETFROM:+0100", "TZOFFSETTO:+0100", "RRULE:FREQ=SOMETIMES"), "RRULE"},
+		// rrule-go panics while it starts this rule: there is no 20th Saturday in October.
+		{"RRULE that can't start", standard("DTSTART:19700101T000000", "TZOFFSETFROM:+0100", "TZOFFSETTO:+0100", "RRULE:FREQ=YEARLY;BYDAY=20SA;BYMONTH=10"), "RRULE"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
