@@ -2,7 +2,6 @@ package tzatziki
 
 import (
 	"bytes"
-	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,7 +26,7 @@ func FuzzToLocation(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, data []byte) {
-		cal, err := decode(data)
+		cal, err := ical.NewDecoder(bytes.NewReader(data)).Decode()
 		if err != nil {
 			return
 		}
@@ -80,15 +79,4 @@ func FuzzFromLocation(f *testing.F) {
 			}
 		}
 	})
-}
-
-// decode reads a calendar. go-ical panics on some input, which is its problem
-// to fix and not what this target looks for.
-func decode(data []byte) (cal *ical.Calendar, err error) {
-	defer func() {
-		if recover() != nil {
-			cal, err = nil, errors.New("go-ical panicked")
-		}
-	}()
-	return ical.NewDecoder(bytes.NewReader(data)).Decode()
 }
