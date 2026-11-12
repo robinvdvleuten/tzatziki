@@ -175,12 +175,12 @@ func observanceOnsets(component *ical.Component, from int) ([]time.Time, error) 
 	if err != nil {
 		return nil, fmt.Errorf("read definition's RRULE: %w", err)
 	}
-	next := rule.Iterator()
+	next := instances(rule)
 	for step := 0; ; step++ {
 		if step >= maxZoneSteps {
 			return nil, ErrRuleTooExpensive
 		}
-		at, ok, err := nextInstance(next)
+		at, ok, err := next()
 		if err != nil {
 			return nil, fmt.Errorf("read definition's RRULE: %w", err)
 		}
@@ -191,16 +191,24 @@ func observanceOnsets(component *ical.Component, from int) ([]time.Time, error) 
 	}
 }
 
-// nextInstance asks a rule for its next instance. rrule-go panics on some rules
-// it accepted, such as one starting in the year 0, and rules come from strangers.
-func nextInstance(next rrule.Next) (at time.Time, ok bool, err error) {
-	defer func() {
-		if recover() != nil {
-			at, ok, err = time.Time{}, false, errRuleUnusable
+// instances returns a function that gives a rule's instances in order. rrule-go
+// panics on some rules it accepted, both when it starts and while it iterates,
+// such as one starting in the year 0 or asking for the 20th Saturday of a
+// month. Rules come from strangers, so a panic becomes an error.
+func instances(rule *rrule.RRule) func() (time.Time, bool, error) {
+	var next rrule.Next
+	return func() (at time.Time, ok bool, err error) {
+		defer func() {
+			if recover() != nil {
+				at, ok, err = time.Time{}, false, errRuleUnusable
+			}
+		}()
+		if next == nil {
+			next = rule.Iterator()
 		}
-	}()
-	at, ok = next()
-	return at, ok, nil
+		at, ok = next()
+		return at, ok, nil
+	}
 }
 
 // encodeTZif writes the format time.LoadLocationFromTZData reads (RFC 9636).
